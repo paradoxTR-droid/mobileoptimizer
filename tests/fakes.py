@@ -55,6 +55,9 @@ class FakeAdb:
             return self.ok(self.props.get(a[0], "") + "\n")
         return self.ok("".join(f"[{k}]: [{v}]\n" for k, v in self.props.items()))
 
+    def _h_mkdir(self, a):
+        return self.ok()
+
     def _h_settings(self, a):
         op, ns, key = a[0], a[1], a[2]
         if op == "get":
