@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import re
+
 from .actions import Action
 from .adb import AdbError
 
@@ -16,10 +18,20 @@ REASON_GONE = "cihazda artık yok"
 COMPILE_TIMEOUT = 3600  # `compile -a` can take tens of minutes on a full phone
 
 
+def _error_text(args: list[str], text: str) -> str:
+    """One readable line for the report instead of a Java stack trace."""
+    lines = [ln.strip() for ln in text.splitlines() if ln.strip() and not ln.strip().startswith("at ")]
+    for ln in lines:
+        m = re.match(r"(?:[\w.]+\.)?SecurityException: (.+)", ln)
+        if m:
+            return f"Telefon bu işleme izin vermedi: {m.group(1).strip()}"
+    return lines[0] if lines else " ".join(args)
+
+
 def _run(adb, args: list[str], timeout: int = 120) -> str:
     r = adb.shell(args, timeout=timeout)
     if r.code != 0 or any(m in r.out for m in _FAIL_MARKERS):
-        raise AdbError(f"{' '.join(args)}: {(r.err or r.out).strip()}")
+        raise AdbError(_error_text(args, f"{r.err}\n{r.out}"))
     return r.out
 
 
