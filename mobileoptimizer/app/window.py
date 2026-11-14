@@ -13,9 +13,9 @@ from . import pages
 from .i18n import t
 from .worker import run_in_thread
 
-# (menu label key, guide text key); Task 10 adds the SmartScreen guide here
+# (menu label key, guide text key)
 HELP_TOPICS = [("help.usb", "guide.usb_debug"), ("help.xiaomi", "guide.xiaomi_security"),
-               ("help.driver", "guide.windows_driver")]
+               ("help.driver", "guide.windows_driver"), ("help.smartscreen", "guide.smartscreen")]
 
 
 class MainWindow(QMainWindow):

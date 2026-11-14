@@ -98,6 +98,17 @@ history.recover_done: "Kurtarma tamamlandı."
 help.usb: "USB hata ayıklama nasıl açılır?"
 help.xiaomi: "Xiaomi için ek adım"
 help.driver: "Telefon görünmüyor (Windows)"
+help.smartscreen: "Windows \"bilgisayarınızı korudu\" uyarısı"
+guide.smartscreen: |
+  Bu program ücretsizdir ve dijital imzası yoktur. Bu yüzden Windows ilk açılışta
+  "Windows bilgisayarınızı korudu" uyarısı gösterebilir.
+  1. Uyarıdaki "Ek bilgi" yazısına tıklayın.
+  2. Çıkan "Yine de çalıştır" düğmesine tıklayın.
+  Antivirüs programınız dosyayı karantinaya alırsa: antivirüste "Karantina" bölümünü açın,
+  MobileOptimizer klasörünü geri yükleyin ve klasörü "istisnalar" listesine ekleyin.
+  Dosyanın değiştirilmediğini kontrol etmek için Komut İstemi'nde şunu çalıştırın:
+  certutil -hashfile MobileOptimizer-<sürüm>-windows.zip SHA256
+  Çıkan değer, indirme sayfasındaki .sha256 dosyasıyla aynı olmalıdır.
 
 error.title: "Hata"
 error.disconnected: "Telefonun bağlantısı koptu. Kabloyu kontrol edip yeniden bağlayın. Yapılanlar kaydedildi ve geri alınabilir."
