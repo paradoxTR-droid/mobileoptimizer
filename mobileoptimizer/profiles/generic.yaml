@@ -1,0 +1,180 @@
+# Genel Android profili. Tüm markalar bunu temel alır (extends: generic).
+# Kural: hazır profillere (presets) yalnızca risk: safe ve verified: true işlemler girer.
+# verified: true yalnızca test cihazında/emülatörde uygula + geri al denemesi geçtikten sonra yazılır.
+brand: generic
+match: []
+
+actions:
+  # --- performans ------------------------------------------------------------
+  - id: anim_window
+    type: setting
+    namespace: global
+    key: window_animation_scale
+    value: "0.5"
+    category: performance
+    risk: safe
+    verified: true
+    title: Pencere animasyonlarını hızlandır
+    description: Pencere açılış/kapanış animasyonlarını yarı süreye indirir. Telefon daha hızlı hissettirir.
+
+  - id: anim_transition
+    type: setting
+    namespace: global
+    key: transition_animation_scale
+    value: "0.5"
+    category: performance
+    risk: safe
+    verified: true
+    title: Geçiş animasyonlarını hızlandır
+    description: Ekranlar arası geçiş animasyonlarını yarı süreye indirir.
+
+  - id: anim_animator
+    type: setting
+    namespace: global
+    key: animator_duration_scale
+    value: "0.5"
+    category: performance
+    risk: safe
+    verified: true
+    title: Uygulama içi animasyonları hızlandır
+    description: Uygulamaların kendi animasyonlarını yarı süreye indirir. 0 değil, çünkü bazı uygulamalar 0'da bozulur.
+
+  - id: compile_all
+    type: compile
+    mode: speed-profile
+    category: performance
+    risk: safe
+    verified: true
+    title: Uygulamaları önceden derle
+    description: Sık kullanılan kodları önceden derler, uygulamalar daha hızlı açılır. Birkaç dakika sürebilir. Android bunu zamanla kendisi de yapar.
+
+  # --- pil -------------------------------------------------------------------
+  - id: wifi_scan_off
+    type: setting
+    namespace: global
+    key: wifi_scan_always_enabled
+    value: "0"
+    category: battery
+    risk: safe
+    verified: true
+    title: Arka planda Wi-Fi taramasını kapat
+    description: Wi-Fi kapalıyken bile konum için yapılan taramayı durdurur. Konum doğruluğu biraz düşebilir.
+
+  - id: ble_scan_off
+    type: setting
+    namespace: global
+    key: ble_scan_always_enabled
+    value: "0"
+    category: battery
+    risk: safe
+    verified: true
+    title: Arka planda Bluetooth taramasını kapat
+    description: Bluetooth kapalıyken bile konum için yapılan taramayı durdurur.
+
+  - id: mobile_data_always_on_off
+    type: setting
+    namespace: global
+    key: mobile_data_always_on
+    value: "0"
+    category: battery
+    risk: safe
+    verified: true
+    title: Wi-Fi varken mobil veriyi açık tutma
+    description: Wi-Fi bağlıyken mobil verinin arka planda hazır tutulmasını kapatır. Ağ geçişi bir an gecikebilir.
+
+  - id: adaptive_battery_on
+    type: setting
+    namespace: global
+    key: adaptive_battery_management_enabled
+    value: "1"
+    category: battery
+    risk: safe
+    verified: true
+    title: Uyarlanabilir pili aç
+    description: Az kullandığınız uygulamaların arka plan pil kullanımını Android'in kısıtlamasına izin verir.
+
+  - id: app_standby_on
+    type: setting
+    namespace: global
+    key: app_standby_enabled
+    value: "1"
+    category: battery
+    risk: safe
+    verified: true
+    title: Uygulama bekleme modunu aç
+    description: Kullanılmayan uygulamaların bekleme moduna geçmesini sağlar.
+
+  - id: doze_light_faster
+    type: device_config
+    namespace: device_idle
+    key: light_after_inactive_to
+    value: "60000"
+    min_sdk: 31
+    max_sdk: 34  # Android 15+ shell cannot write device_config (allowlist), seen on API 37 emulator
+    category: battery
+    risk: careful
+    verified: false
+    title: Hafif uyku moduna daha erken geç
+    description: Ekran kapandıktan 1 dakika sonra hafif Doze başlar (varsayılan 3 dakika). Bazı bildirimler biraz gecikebilir. Google bu ayarı zamanla sıfırlayabilir.
+
+  - id: doze_deep_faster
+    type: device_config
+    namespace: device_idle
+    key: inactive_to
+    value: "600000"
+    min_sdk: 31
+    max_sdk: 34  # Android 15+ shell cannot write device_config (allowlist), seen on API 37 emulator
+    category: battery
+    risk: careful
+    verified: false
+    title: Derin uyku moduna daha erken geç
+    description: Telefon hareketsizken 10 dakika sonra derin Doze başlar (varsayılan 30 dakika). Bildirimler gecikebilir. Google bu ayarı zamanla sıfırlayabilir.
+
+  # --- temizlik (birçok markada önyüklü gelen Facebook servisleri) -------------
+  - id: fb_appmanager
+    type: package_disable
+    package: com.facebook.appmanager
+    category: cleanup
+    risk: safe
+    verified: true
+    source: uad
+    title: Facebook App Manager'ı kapat
+    description: Facebook uygulamalarını arka planda güncelleyen önyüklü servis. Facebook'u kullanmaya devam edebilirsiniz.
+
+  - id: fb_services
+    type: package_disable
+    package: com.facebook.services
+    category: cleanup
+    risk: safe
+    verified: true
+    source: uad
+    title: Facebook Services'i kapat
+    description: Arka planda çalışan önyüklü Facebook servisi.
+
+  - id: fb_system
+    type: package_disable
+    package: com.facebook.system
+    category: cleanup
+    risk: safe
+    verified: true
+    source: uad
+    title: Facebook App Installer'ı kapat
+    description: Facebook uygulamalarını kurmak için önyüklü gelen servis.
+
+  - id: fb_katana_rare
+    type: standby_bucket
+    package: com.facebook.katana
+    bucket: rare
+    category: battery
+    risk: safe
+    verified: true
+    title: Facebook'u nadir kullanılan olarak işaretle
+    description: Facebook uygulamasının arka planda daha az uyanmasını sağlar. Android zamanla bu ayarı değiştirebilir.
+
+presets:
+  max_performance: [anim_window, anim_transition, anim_animator, compile_all,
+                    fb_appmanager, fb_services, fb_system]
+  max_battery: [anim_window, anim_transition, anim_animator, wifi_scan_off, ble_scan_off,
+                mobile_data_always_on_off, adaptive_battery_on, app_standby_on,
+                fb_appmanager, fb_services, fb_system, fb_katana_rare]
+  balanced: [anim_window, anim_transition, anim_animator, compile_all, fb_appmanager, fb_services, fb_system]
