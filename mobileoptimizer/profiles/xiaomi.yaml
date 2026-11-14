@@ -1,5 +1,6 @@
 # Xiaomi / Redmi / POCO (MIUI ve HyperOS). Test cihazı: Redmi Note 14 4G (HyperOS).
-# Markaya özel işlemler verified: false gelir. Redmi Note 14 4G'de
+# verified: true olanlar Redmi Note 14 4G (HyperOS 3.0, Android 16) üzerinde uygula + geri al ile denendi (2026-11-14).
+# Diğerleri verified: false. Redmi Note 14 4G'de
 #   python -m mobileoptimizer.tools.verify_profile --serial <seri> --profile xiaomi
 # ile OK görünen ve uygula + geri al denemesi geçen satırlar verified: true yapılır.
 # Not: Xiaomi'de "USB hata ayıklama (Güvenlik ayarları)" açık değilse ayar yazma işlemleri reddedilir.
@@ -30,27 +31,30 @@ blacklist_add:
 
 actions:
   # --- ekran yenileme hızı (HyperOS / MIUI) ----------------------------------------
+  # HyperOS 3 (Redmi Note 14 4G): secure miui_refresh_rate changes the panel rate; system peak_refresh_rate
+  # and secure user_refresh_rate did not (measured with dumpsys SurfaceFlinger, 2026-11-14).
+  # shortcut: value 120 assumes a 120 Hz panel; on 90/144 Hz models verify before marking verified.
   - id: mi_refresh_high
     type: setting
-    namespace: system
-    key: peak_refresh_rate
-    value: "120.0"
+    namespace: secure
+    key: miui_refresh_rate
+    value: "120"
     rom: [hyperos, miui]
     category: performance
     risk: safe
-    verified: false
+    verified: true
     title: Yüksek ekran yenileme hızı
-    description: Ekranın en yüksek yenileme hızını 120 Hz'e izin verecek şekilde ayarlar. Pil biraz daha hızlı biter.
+    description: Ekranı 120 Hz'e alır. Akıcılık artar, pil biraz daha hızlı biter.
 
   - id: mi_refresh_standard
     type: setting
-    namespace: system
-    key: peak_refresh_rate
-    value: "60.0"
+    namespace: secure
+    key: miui_refresh_rate
+    value: "60"
     rom: [hyperos, miui]
     category: battery
     risk: safe
-    verified: false
+    verified: true
     title: Standart ekran yenileme hızı (60 Hz)
     description: Ekranı 60 Hz ile sınırlar. Pil daha uzun gider.
 
@@ -141,7 +145,7 @@ actions:
     package: com.miui.android.fashiongallery
     category: cleanup
     risk: safe
-    verified: false
+    verified: true
     source: uad
     title: Kilit ekranı duvar kağıdı döngüsünü kapat
     description: Kilit ekranında reklamlı içerik gösteren duvar kağıdı servisi.
@@ -208,9 +212,10 @@ actions:
     description: Kapatma işe yaramazsa kullanıcı için kaldırır. Geri getirilirse fabrika sürümü gelir, güncellemeler kaybolur.
 
 presets:
-  max_performance: [anim_window, anim_transition, anim_animator, compile_all,
-                    fb_appmanager, fb_services, fb_system]
+  # Facebook services, Analiz, Sarı Sayfalar, Xiaomi Oyunlar: HyperOS 3 refuses disable-user
+  # ("Cannot disable system packages"), so they stay out of the presets.
+  max_performance: [anim_window, anim_transition, anim_animator, compile_all, mi_refresh_high, mi_glance]
   max_battery: [anim_window, anim_transition, anim_animator, wifi_scan_off, ble_scan_off,
                 mobile_data_always_on_off, adaptive_battery_on, app_standby_on,
-                fb_appmanager, fb_services, fb_system, fb_katana_rare]
-  balanced: [anim_window, anim_transition, anim_animator, compile_all, fb_appmanager, fb_services, fb_system]
+                mi_refresh_standard, mi_glance]
+  balanced: [anim_window, anim_transition, anim_animator, compile_all, mi_glance]

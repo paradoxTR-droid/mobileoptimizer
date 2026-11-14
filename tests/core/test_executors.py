@@ -122,6 +122,17 @@ def test_apply_failure_in_stdout_raises():
         apply(fa, A("package_disable", package=PKG))
 
 
+def test_java_stack_trace_becomes_one_readable_line():
+    fa = fake()
+    fa.pm_failure = ("Exception occurred while executing 'disable-user':\n"
+                     "java.lang.SecurityException: Cannot disable system packages.\n"
+                     "\tat com.android.server.pm.PackageManagerServiceImpl.shouldRestrict(PackageManagerServiceImpl.java:1064)\n"
+                     "\tat android.os.Binder.execTransact(Binder.java:1372)")
+    with pytest.raises(AdbError) as e:
+        apply(fa, A("package_disable", package=PKG))
+    assert str(e.value) == "Telefon bu işleme izin vermedi: Cannot disable system packages."
+
+
 def test_compile_uses_long_timeout():
     fa = fake()
     apply(fa, A("compile", mode="speed-profile"))
