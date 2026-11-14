@@ -47,6 +47,12 @@ class FakeAdb:
             raise AdbError("push failed")
         self.pushed[remote] = Path(local).read_text(encoding="utf-8")
 
+    # --- command handlers -----------------------------------------------------
+    def _h_getprop(self, a):
+        if a:
+            return self.ok(self.props.get(a[0], "") + "\n")
+        return self.ok("".join(f"[{k}]: [{v}]\n" for k, v in self.props.items()))
+
     # --- helpers --------------------------------------------------------------
     @staticmethod
     def ok(out: str = "") -> ShellResult:
