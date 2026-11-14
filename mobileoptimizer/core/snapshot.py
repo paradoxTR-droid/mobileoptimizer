@@ -16,6 +16,9 @@ from .executors import revert
 
 log = logging.getLogger(__name__)
 PHONE_DIR = "/sdcard/MobileOptimizer"
+# entries whose change may be on the phone: "attempted"/"failed" can have reached it even without a
+# success reply, and reverting them is safe because revert is state-guarded or idempotent
+REVERTABLE = frozenset({"applied", "applied_temporary", "attempted", "failed"})
 
 
 @dataclass
@@ -122,7 +125,7 @@ def undo(adb, store: SnapshotStore, serial: str, snap_id: str) -> list[tuple[str
     results = []
     for snap in undo_chain(store, serial, snap_id):
         for entry in reversed(snap.entries):
-            if entry.status not in ("applied", "applied_temporary"):
+            if entry.status not in REVERTABLE:
                 continue
             try:
                 reason = revert(adb, entry.action, entry.prior)
@@ -134,7 +137,8 @@ def undo(adb, store: SnapshotStore, serial: str, snap_id: str) -> list[tuple[str
             else:
                 entry.status = "reverted"
             results.append((entry.action.id, reason))
-        snap.reverted = True
+        # stay live while anything is left, so the user can retry the undo
+        snap.reverted = not any(e.status in REVERTABLE for e in snap.entries)
         store.save(snap)
     return results
 
@@ -148,14 +152,13 @@ def can_undo_single(store: SnapshotStore, serial: str, snap_id: str, action_id: 
     if snap.reverted:
         return False
     entry = next((e for e in snap.entries if e.action.id == action_id), None)
-    if entry is None or entry.status not in ("applied", "applied_temporary"):
+    if entry is None or entry.status not in REVERTABLE:
         return False
     target = entry.action.target
     for later in snaps[ids.index(snap_id) + 1:]:
         if later.reverted:
             continue
-        if any(e.action.target == target and e.status in ("applied", "applied_temporary")
-               for e in later.entries):
+        if any(e.action.target == target and e.status in REVERTABLE for e in later.entries):
             return False
     return True
 
@@ -165,7 +168,13 @@ def undo_single(adb, store: SnapshotStore, serial: str, snap_id: str, action_id:
         return "sonraki bir oturum bu ayarı değiştirdi"
     snap = store.load(serial, snap_id)
     entry = next(e for e in snap.entries if e.action.id == action_id)
-    reason = revert(adb, entry.action, entry.prior)
+    try:
+        reason = revert(adb, entry.action, entry.prior)
+    except AdbDisconnected:
+        raise
+    except AdbError as e:
+        return str(e)  # entry stays revertable
     entry.status = "reverted"
+    snap.reverted = not any(e.status in REVERTABLE for e in snap.entries)
     store.save(snap)
     return reason

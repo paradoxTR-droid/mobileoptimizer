@@ -90,7 +90,8 @@ def test_disconnect_mid_run(tmp_path):
     fa.disconnect_after = start + 3 + 1 + 2
     snap, results = run(fa, pv, store, "S1", "samsung", "balanced")
     assert [(r.action_id, r.status) for r in results] == [("a", "applied"), ("b", "not_run"), ("c", "not_run")]
-    assert [e.status for e in store.load("S1", snap.id).entries] == ["applied", "not_run", "not_run"]
+    # "b" was being sent when the cable went: it may have reached the phone, so it stays revertable
+    assert [e.status for e in store.load("S1", snap.id).entries] == ["applied", "attempted", "not_run"]
     fa.disconnect_after = None
     undo(fa, store, "S1", snap.id)
     assert fa.settings[("global", "a")] == "1.0"
@@ -131,3 +132,62 @@ def test_check_drift_detects_bucket_change(tmp_path):
     assert check_drift(fa, store, "S1") == []
     fa.buckets[PKG] = 10
     assert check_drift(fa, store, "S1") == ["bk"]
+
+
+def test_disconnect_during_apply_reply_keeps_entry_revertable(tmp_path):
+    fa = fake()
+    store = SnapshotStore(tmp_path)
+    pv = build_preview(fa, profile(mk("a"), mk("b")), info(), frozenset(), preset="balanced")
+    orig = fa._h_settings
+
+    def put_then_drop(a):
+        r = orig(a)
+        if a[0] == "put":
+            from mobileoptimizer.core.adb import AdbDisconnected
+            raise AdbDisconnected("device offline")  # phone ran it, reply lost
+        return r
+
+    fa._h_settings = put_then_drop
+    snap, results = run(fa, pv, store, "S1", "samsung", "balanced")
+    assert results[0].status == "not_run"
+    assert fa.settings[("global", "a")] == "0.5"
+    fa._h_settings = orig
+    undo(fa, store, "S1", snap.id)
+    assert fa.settings[("global", "a")] == "1.0"
+
+
+def test_timeout_in_verify_does_not_escape_run(tmp_path):
+    fa = fake()
+    pv = build_preview(fa, profile(mk("a"), mk("b")), info(), frozenset(), preset="balanced")
+    orig = fa._h_settings
+    calls = {"get": 0}
+
+    def slow_get(a):
+        if a[0] == "get" and a[2] == "a":
+            calls["get"] += 1
+            if calls["get"] == 2:  # 1st get is capture, 2nd is verify
+                from mobileoptimizer.core.adb import AdbError
+                raise AdbError("adb zaman aşımı")
+        return orig(a)
+
+    fa._h_settings = slow_get
+    snap, results = run(fa, pv, SnapshotStore(tmp_path), "S1", "samsung", "balanced")
+    assert [(r.action_id, r.status) for r in results] == [("a", "failed"), ("b", "applied")]
+    assert snap.entries[0].status == "applied"
+
+
+def test_capture_error_skips_only_that_action(tmp_path):
+    fa = fake()
+    pv = build_preview(fa, profile(mk("a"), mk("b")), info(), frozenset(), preset="balanced")
+    orig = fa._h_settings
+
+    def bad_capture(a):
+        if a[0] == "get" and a[2] == "a":
+            from mobileoptimizer.core.adb import AdbError
+            raise AdbError("adb zaman aşımı")
+        return orig(a)
+
+    fa._h_settings = bad_capture
+    snap, results = run(fa, pv, SnapshotStore(tmp_path), "S1", "samsung", "balanced")
+    assert [(r.action_id, r.status) for r in results] == [("a", "not_run"), ("b", "applied")]
+    assert fa.settings[("global", "a")] == "1.0"

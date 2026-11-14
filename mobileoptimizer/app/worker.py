@@ -23,9 +23,16 @@ class _Task(QRunnable):
             kw = {"on_progress": lambda *a: self.s.progress.emit(a)} if self.with_progress else {}
             result = self.fn(*self.args, **kw)
         except Exception as e:  # noqa: BLE001 - every failure must reach the UI
-            self.s.error.emit(e)
+            self._emit(self.s.error, e)
         else:
-            self.s.done.emit(result)
+            self._emit(self.s.done, result)
+
+    @staticmethod
+    def _emit(signal, value):
+        try:
+            signal.emit(value)
+        except RuntimeError:  # window closed while the task ran; nobody to tell
+            pass
 
 
 def run_in_thread(fn, *args, on_done, on_error, on_progress=None) -> None:

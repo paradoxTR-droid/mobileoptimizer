@@ -28,6 +28,7 @@ class MainWindow(QMainWindow):
         self.blocked: frozenset[str] = frozenset()
         self.preset: str | None = None
         self._prev = None
+        self.busy = False  # one phone-changing task at a time (apply, undo, recover)
 
         root = QWidget()
         col = QVBoxLayout(root)
@@ -106,8 +107,33 @@ class MainWindow(QMainWindow):
         else:
             self.notice(t("error.generic", msg=err))
 
-    # --- undo ---------------------------------------------------------------------
+    # --- phone-changing tasks -------------------------------------------------------
+    def set_busy(self, busy: bool) -> None:
+        self.busy = busy
+        self.history_btn.setEnabled(not busy)
+        if self.stack.currentWidget() is self.history_page:
+            self.history_page.refresh()
+
+    def run_task(self, fn, *args, on_done, on_error=None, on_progress=None) -> bool:
+        """Run a task that changes the phone; refuse if one is already running."""
+        if self.busy:
+            return False
+        self.set_busy(True)
+
+        def done(result):
+            self.set_busy(False)
+            on_done(result)
+
+        def error(err):
+            self.set_busy(False)
+            (on_error or self.fail)(err)
+
+        run_in_thread(fn, *args, on_done=done, on_error=error, on_progress=on_progress)
+        return True
+
     def undo_snapshot(self, snap_id: str) -> None:
+        if self.busy:
+            return
         if self.adb is None or self.info is None:
             self.notice(t("history.need_device"))
             return
@@ -121,4 +147,4 @@ class MainWindow(QMainWindow):
             if self.stack.currentWidget() is self.history_page:
                 self.history_page.refresh()
 
-        run_in_thread(undo, self.adb, self.store, serial, snap_id, on_done=done, on_error=self.fail)
+        self.run_task(undo, self.adb, self.store, serial, snap_id, on_done=done)

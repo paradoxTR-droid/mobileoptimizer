@@ -55,6 +55,8 @@ def build_preview(adb, profile, info, blocked: frozenset[str], *, preset: str | 
 
 def _apply_one(adb, store: SnapshotStore, snap: Snapshot, e: Entry) -> Result:
     a = e.action
+    e.status = "attempted"  # if we crash or lose the reply, undo still reverts this one
+    store.save(snap)
     try:
         apply(adb, a)
     except AdbDisconnected:
@@ -63,10 +65,10 @@ def _apply_one(adb, store: SnapshotStore, snap: Snapshot, e: Entry) -> Result:
         e.status = "failed"
         return Result(a.id, "failed", str(err))
     e.status = "applied_temporary" if a.temporary else "applied"
-    store.save(snap)  # record the change before anything else can go wrong
+    store.save(snap)
     try:
         ok = verify(adb, a)
-    except AdbDisconnected:
+    except AdbError:  # includes AdbDisconnected: the next apply will notice the cable
         return Result(a.id, "failed", "uygulandı, doğrulama yapılamadı")
     if not ok:
         return Result(a.id, "failed", "uygulandı ama doğrulanamadı")
@@ -77,6 +79,7 @@ def run(adb, preview: Preview, store: SnapshotStore, serial: str, profile_name: 
         on_progress: Callable[[int, int, Action], None] = lambda *a: None) -> tuple[Snapshot, list[Result]]:
     snap = store.new(serial, profile_name, preset)
     cut = False
+    capture_errors: dict[str, str] = {}
     for a in preview.to_apply:
         if not cut:
             try:
@@ -84,6 +87,8 @@ def run(adb, preview: Preview, store: SnapshotStore, serial: str, profile_name: 
                 continue
             except AdbDisconnected:
                 cut = True
+            except AdbError as err:  # no prior recorded: never apply this one
+                capture_errors[a.id] = str(err)
         snap.entries.append(Entry(a, None, "not_run"))
     if cut:  # never apply anything whose prior state we could not record
         for e in snap.entries:
@@ -98,16 +103,19 @@ def run(adb, preview: Preview, store: SnapshotStore, serial: str, profile_name: 
     results: list[Result] = []
     total = len(snap.entries)
     for i, e in enumerate(snap.entries, 1):
+        if e.action.id in capture_errors:
+            results.append(Result(e.action.id, "not_run", capture_errors[e.action.id]))
+            continue
         if cut:
-            e.status = "not_run"
+            if e.status == "pending":
+                e.status = "not_run"
             results.append(Result(e.action.id, "not_run", DISCONNECTED))
             continue
         on_progress(i, total, e.action)
         try:
             results.append(_apply_one(adb, store, snap, e))
         except AdbDisconnected:
-            cut = True
-            e.status = "not_run"
+            cut = True  # entry stays "attempted": the phone may have run it
             results.append(Result(e.action.id, "not_run", DISCONNECTED))
         store.save(snap)
     store.save(snap)

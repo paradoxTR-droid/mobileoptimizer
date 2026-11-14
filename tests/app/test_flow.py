@@ -154,3 +154,29 @@ def test_dynamic_tr_keys_exist():
                | {f"badge.{r}" for r in RISKS} | {f"custom.tab.{c}" for c in CATEGORIES}
                | {f"profile.{p}" for p in ("max_performance", "max_battery", "balanced", "custom")})
     assert sorted(dynamic - strings.keys()) == []
+
+
+def test_history_and_undo_blocked_while_applying(win, qtbot):
+    import threading
+    gate = threading.Event()
+    orig = win.fa._h_cmd
+
+    def slow_compile(a):
+        if a[:2] == ["package", "compile"]:
+            gate.wait(10)
+        return orig(a)
+
+    win.fa._h_cmd = slow_compile
+    to_preview(win, qtbot)
+    win.preview_page.ack.setChecked(True)
+    win.preview_page.apply_btn.click()
+    qtbot.waitUntil(lambda: win.busy and bool(win.store.list("R5CX1")))
+    assert not win.history_btn.isEnabled()
+    asked = []
+    win.confirm = lambda text: (asked.append(text), True)[1]
+    snap_id = win.store.list("R5CX1")[0].id
+    win.undo_snapshot(snap_id)
+    assert asked == []  # refused while busy
+    gate.set()
+    qtbot.waitUntil(lambda: win.stack.currentWidget() is win.report_page, timeout=5000)
+    assert not win.busy and win.history_btn.isEnabled()

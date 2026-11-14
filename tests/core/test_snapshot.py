@@ -119,3 +119,29 @@ def test_push_copy_failure_does_not_raise(tmp_path):
     snap = run(fa, store, [ANIM])
     fa.fail_push = True
     push_copy(fa, store, snap)
+
+
+def test_failed_revert_keeps_snapshot_live_for_retry(tmp_path):
+    fa, store = fake(), SnapshotStore(tmp_path)
+    s1 = run(fa, store, [ANIM])
+    orig = fa._h_settings
+    fa._h_settings = lambda a: fa.fail("Security exception", 255) if a[0] == "put" else orig(a)
+    result = undo(fa, store, "S1", s1.id)
+    assert result[0][1]  # reported
+    assert not store.load("S1", s1.id).reverted
+    assert [s.id for s in undo_chain(store, "S1", s1.id)] == [s1.id]
+    fa._h_settings = orig
+    assert undo(fa, store, "S1", s1.id) == [("anim", None)]
+    assert fa.settings[("global", "window_animation_scale")] == "1.0"
+    assert store.load("S1", s1.id).reverted
+
+
+def test_attempted_and_failed_entries_are_reverted(tmp_path):
+    fa, store = fake(), SnapshotStore(tmp_path)
+    s1 = run(fa, store, [ANIM, TRANS], {"anim": "attempted", "trans": "failed"})
+    # the phone took both changes even though the app never saw a success reply
+    fa.settings[("global", "window_animation_scale")] = "0.5"
+    fa.settings[("global", "transition_animation_scale")] = "0.5"
+    undo(fa, store, "S1", s1.id)
+    assert fa.settings[("global", "window_animation_scale")] == "1.0"
+    assert fa.settings[("global", "transition_animation_scale")] == "1.0"

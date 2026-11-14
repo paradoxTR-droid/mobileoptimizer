@@ -17,7 +17,7 @@ from mobileoptimizer.core.guard import blocked_set
 from mobileoptimizer.core.profiles import pick_profile
 from mobileoptimizer.core.recovery import recover
 from mobileoptimizer.core.session import build_preview, check_drift, run
-from mobileoptimizer.core.snapshot import can_undo_single, undo_single
+from mobileoptimizer.core.snapshot import REVERTABLE, can_undo_single, undo_single
 
 from .i18n import t
 from .worker import run_in_thread
@@ -327,14 +327,21 @@ class ApplyPage(Page):
         self.box.addWidget(self.bar)
         self.box.addWidget(self.step)
         self.box.addWidget(wrap(t("apply.keep_connected")))
-        self.box.addStretch(1)
+        self.back_btn = QPushButton(t("nav.back"))  # only shown if the run itself errors out
+        self.back_btn.clicked.connect(lambda: self.w.go(self.w.profile_page))
+        self.buttons(self.back_btn)
 
     def start(self, pv):
         self.bar.setRange(0, len(pv.to_apply))
         self.bar.setValue(0)
+        self.back_btn.hide()
         w = self.w
         fn = partial(run, w.adb, pv, w.store, w.info.serial, w.profile.name, w.preset)
-        run_in_thread(fn, on_done=self._done, on_error=w.fail, on_progress=self._progress)
+        w.run_task(fn, on_done=self._done, on_error=self._error, on_progress=self._progress)
+
+    def _error(self, err):
+        self.back_btn.show()
+        self.w.fail(err)
 
     def _progress(self, i, n, action):
         self.bar.setValue(i - 1)
@@ -374,7 +381,7 @@ class ReportPage(Page):
             if r.status in ("failed", "skipped", "not_run") and r.detail:
                 line += f": {r.detail}"
             self.list.addItem(line)
-        self.undo_btn.setEnabled(any(e.status in ("applied", "applied_temporary") for e in snap.entries))
+        self.undo_btn.setEnabled(any(e.status in REVERTABLE for e in snap.entries))
 
 
 class HistoryPage(Page):
@@ -417,10 +424,11 @@ class HistoryPage(Page):
                                     reverted=t("history.reverted") if s.reverted else ""))
         self.empty.setText("" if self.snaps else t("history.empty") if connected else t("history.need_device"))
         live = [s for s in self.snaps if not s.reverted]
+        idle = not self.w.busy
         self.undo_btn.setEnabled(False)
         self.single_btn.setEnabled(False)
-        self.factory_btn.setEnabled(bool(live))
-        self.recover_btn.setEnabled(connected)
+        self.factory_btn.setEnabled(bool(live) and idle)
+        self.recover_btn.setEnabled(connected and idle)
 
     def _current(self):
         row = self.list.currentRow()
@@ -429,7 +437,7 @@ class HistoryPage(Page):
     def _selected(self, _row):
         s = self._current()
         self.entries.clear()
-        self.undo_btn.setEnabled(bool(s and not s.reverted))
+        self.undo_btn.setEnabled(bool(s and not s.reverted) and not self.w.busy)
         self.single_btn.setEnabled(False)
         if s:
             for e in s.entries:
@@ -437,7 +445,7 @@ class HistoryPage(Page):
 
     def _entry_selected(self, row):
         s = self._current()
-        ok = bool(s) and 0 <= row < len(s.entries) and can_undo_single(
+        ok = bool(s) and not self.w.busy and 0 <= row < len(s.entries) and can_undo_single(
             self.w.store, s.serial, s.id, s.entries[row].action.id)
         self.single_btn.setEnabled(ok)
 
@@ -451,10 +459,9 @@ class HistoryPage(Page):
         if not s or not 0 <= row < len(s.entries):
             return
         aid = s.entries[row].action.id
-        run_in_thread(undo_single, self.w.adb, self.w.store, s.serial, s.id, aid,
-                      on_done=lambda reason: (self.w.notice(t("history.done", skipped=1 if reason else 0)),
-                                              self.refresh()),
-                      on_error=self.w.fail)
+        self.w.run_task(undo_single, self.w.adb, self.w.store, s.serial, s.id, aid,
+                        on_done=lambda reason: (self.w.notice(t("history.done", skipped=1 if reason else 0)),
+                                                self.refresh()))
 
     def _factory(self):
         live = [s for s in self.snaps if not s.reverted]
@@ -464,5 +471,5 @@ class HistoryPage(Page):
     def _recover(self):
         if not self.w.confirm(t("history.recover_confirm")):
             return
-        run_in_thread(recover, self.w.adb, self.w.profile,
-                      on_done=lambda _: self.w.notice(t("history.recover_done")), on_error=self.w.fail)
+        self.w.run_task(recover, self.w.adb, self.w.profile,
+                        on_done=lambda _: self.w.notice(t("history.recover_done")))
