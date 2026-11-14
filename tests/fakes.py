@@ -25,6 +25,7 @@ class FakeAdb:
         self.calls: list[list[str]] = []
         self.disconnect_after: int | None = None
         self.fail_push = False
+        self.roles_fail = False
 
     # --- public Adb surface -------------------------------------------------
     def devices(self) -> list[DeviceEntry]:
@@ -52,6 +53,30 @@ class FakeAdb:
         if a:
             return self.ok(self.props.get(a[0], "") + "\n")
         return self.ok("".join(f"[{k}]: [{v}]\n" for k, v in self.props.items()))
+
+    def _h_settings(self, a):
+        op, ns, key = a[0], a[1], a[2]
+        if op == "get":
+            return self.ok(self.settings.get((ns, key), "null") + "\n")
+        if op == "put":
+            self.settings[(ns, key)] = a[3]
+            return self.ok()
+        if op == "delete":
+            self.settings.pop((ns, key), None)
+            return self.ok("Deleted 1 rows\n")
+        raise AssertionError(a)
+
+    def _h_cmd(self, a):
+        sub = a[0]
+        if sub == "role" and a[1] == "get-role-holders":
+            if self.roles_fail:
+                return self.fail("Unknown command", 255)
+            short = a[2].rsplit(".", 1)[-1]
+            holder = self.roles.get(short, "")
+            return self.ok(holder + "\n" if holder else "")
+        if sub == "package" and a[1] == "resolve-activity":
+            return self.ok(f"priority=0 preferredOrder=0\n{self.home}\n" if self.home else "No activity found\n")
+        raise AssertionError(a)
 
     # --- helpers --------------------------------------------------------------
     @staticmethod
