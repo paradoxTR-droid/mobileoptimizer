@@ -1,0 +1,106 @@
+app.title: "MobileOptimizer"
+nav.history: "Geri al / Geçmiş"
+nav.help: "Yardım"
+nav.back: "Geri"
+nav.next: "Devam"
+
+connect.title: "Telefonunuzu bağlayın"
+connect.waiting: "Telefon bekleniyor… USB kablosuyla bağlayın."
+connect.unauthorized: "Telefonun ekranında çıkan \"USB hata ayıklamaya izin verilsin mi?\" sorusunu onaylayın."
+connect.offline: "Telefon yanıt vermiyor. Kabloyu çıkarıp yeniden takın."
+connect.pick: "Birden fazla telefon bağlı. Hangisiyle devam edilsin?"
+connect.pick_btn: "Bu telefonla devam et"
+
+guide.usb_debug: |
+  1. Ayarlar > Telefon hakkında > Yazılım bilgileri bölümüne gidin.
+  2. "Yapım numarası"na 7 kez dokunun. "Geliştirici modu açıldı" yazısı çıkar.
+  3. Ayarlar > Geliştirici seçenekleri > "USB hata ayıklama"yı açın.
+  4. Telefonu USB kablosuyla bilgisayara bağlayın ve telefondaki izni onaylayın.
+guide.xiaomi_security: |
+  Xiaomi / Redmi / POCO için ek adım:
+  Geliştirici seçenekleri içinde "USB hata ayıklama (Güvenlik ayarları)" seçeneğini de açın.
+  Bu seçenek için telefonda Mi hesabıyla giriş yapılmış ve SIM kart takılı olmalıdır.
+  Bu seçenek kapalıysa ayarlar telefona yazılamaz.
+guide.windows_driver: |
+  Telefon hâlâ görünmüyorsa Windows'ta USB sürücüsü eksik olabilir.
+  Samsung için "Samsung USB Driver for Mobile Phones", diğer markalar için
+  "Google USB Driver" kurun ve telefonu yeniden takın.
+  Kabloyu da değiştirmeyi deneyin: bazı kablolar yalnızca şarj eder.
+
+device.title: "Telefonunuz"
+device.loading: "Telefon bilgileri okunuyor…"
+device.profile: "Kullanılacak ayar seti: {name}"
+device.generic: "Genel Android"
+device.old_android: "Bu telefonun Android sürümü eski. Yalnızca genel ve güvenli ayarlar sunulacak."
+device.drift: "Daha önce uyguladığınız {n} ayar telefon tarafından geri değiştirilmiş."
+device.reapply: "Yeniden uygula"
+
+profile.title: "Ne istiyorsunuz?"
+profile.max_performance: "Maks Performans — telefon daha hızlı ve akıcı"
+profile.max_battery: "Maks Pil — pil daha uzun gider"
+profile.balanced: "Dengeli — hız ve pil arasında"
+profile.custom: "Özel — ayarları kendim seçeceğim"
+
+custom.title: "Ayarları seçin"
+custom.tab.performance: "Performans"
+custom.tab.battery: "Pil"
+custom.tab.cleanup: "Temizlik"
+custom.expert_confirm: |
+  Bu bir uzman işlemidir.
+  Kaldırılan bir sistem uygulaması geri getirildiğinde fabrika sürümü gelir ve güncellemeleri kaybolur.
+  Devam etmek istiyor musunuz?
+custom.none: "Hiçbir ayar seçmediniz."
+
+badge.safe: "güvenli"
+badge.careful: "dikkatli"
+badge.expert: "uzman"
+badge.temporary: "geçici"
+badge.unverified: "doğrulanmamış"
+
+preview.title: "Değişecekler"
+preview.loading: "Telefon kontrol ediliyor…"
+preview.apply_head: "Uygulanacak ({n})"
+preview.skip_head: "Atlanacak ({n})"
+preview.backup_warning: "Önemli verilerinizi (fotoğraf, rehber, mesaj) yedekleyin. Bu program yalnızca kendi değiştirdiği ayarları geri alabilir, verilerinizi yedeklemez."
+preview.backup_ack: "Yedek aldım / anladım"
+preview.apply: "Uygula"
+preview.nothing: "Bu telefonda uygulanacak bir ayar yok."
+
+apply.title: "Uygulanıyor…"
+apply.step: "{i}/{n}: {title}"
+apply.keep_connected: "Lütfen kabloyu çıkarmayın."
+
+report.title: "Rapor"
+report.summary: "{applied} uygulandı, {skipped} atlandı, {failed} başarısız, {not_run} yapılamadı"
+report.undo: "Bu oturumu geri al"
+report.done: "Bitti"
+status.applied: "uygulandı"
+status.applied_temporary: "uygulandı (zamanla sıfırlanabilir)"
+status.skipped: "atlandı"
+status.failed: "başarısız"
+status.not_run: "yapılamadı"
+status.reverted: "geri alındı"
+
+history.title: "Geçmiş ve geri alma"
+history.empty: "Bu telefon için kayıtlı oturum yok."
+history.need_device: "Geçmişi görmek için önce telefonu bağlayın."
+history.item: "{created} — {preset} — {count} değişiklik{reverted}"
+history.reverted: " (geri alındı)"
+history.undo: "Seçilen oturumu geri al"
+history.chain: "Bu işlem {n} oturumu geri alacak (en yeniden eskiye). Devam edilsin mi?"
+history.single: "Seçilen ayarı geri al"
+history.factory: "Fabrika ayarına dön"
+history.recover: "Kurtarma"
+history.recover_confirm: "Kurtarma, bu markanın listesindeki tüm kapatılmış uygulamaları yeniden açar ve animasyonları normale döndürür. Kayıt gerekmez. Devam edilsin mi?"
+history.done: "Geri alma tamamlandı. {skipped} öğe atlandı."
+history.recover_done: "Kurtarma tamamlandı."
+
+help.usb: "USB hata ayıklama nasıl açılır?"
+help.xiaomi: "Xiaomi için ek adım"
+help.driver: "Telefon görünmüyor (Windows)"
+
+error.title: "Hata"
+error.disconnected: "Telefonun bağlantısı koptu. Kabloyu kontrol edip yeniden bağlayın. Yapılanlar kaydedildi ve geri alınabilir."
+error.adb_missing: "adb bulunamadı. Programı yeniden indirin."
+error.generic: "Beklenmeyen bir hata oluştu: {msg}"
+confirm.title: "Onay"
