@@ -11,6 +11,8 @@ import yaml
 from .actions import ACTION_TYPES, CATEGORIES, PARAMS, RISKS, Action
 from .blacklist import is_blocked
 
+SHIPPED_DIR = Path(__file__).resolve().parent.parent / "profiles"
+
 _PKG = re.compile(r"^[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z0-9_]+)+$")
 _IDENT = re.compile(r"^[A-Za-z0-9_.\-]+$")
 _VALUE = re.compile(r"^[A-Za-z0-9_.,:\-]*$")

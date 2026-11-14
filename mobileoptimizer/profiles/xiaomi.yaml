@@ -1,0 +1,214 @@
+# Xiaomi / Redmi / POCO (MIUI ve HyperOS). Test cihazı: Redmi Note 14 4G (HyperOS).
+# Markaya özel işlemler verified: false gelir. Redmi Note 14 4G'de
+#   python -m mobileoptimizer.tools.verify_profile --serial <seri> --profile xiaomi
+# ile OK görünen ve uygula + geri al denemesi geçen satırlar verified: true yapılır.
+# Not: Xiaomi'de "USB hata ayıklama (Güvenlik ayarları)" açık değilse ayar yazma işlemleri reddedilir.
+brand: xiaomi
+match: [xiaomi, redmi, poco]
+extends: generic
+
+blacklist_add:
+  - com.miui.home                  # ana ekran
+  - com.mi.android.globallauncher  # POCO ana ekran
+  - com.miui.securitycenter        # Güvenlik (izinler, pil yönetimi)
+  - com.miui.securitycore
+  - com.miui.securityadd
+  - com.lbe.security.miui          # izin yöneticisi
+  - com.miui.guardprovider
+  - com.android.updater            # sistem güncelleme
+  - com.android.thememanager       # tema motoru çekirdeği
+  - com.miui.powerkeeper           # pil ve performans yönetimi
+  - com.miui.system
+  - com.miui.rom
+  - com.miui.core
+  - com.xiaomi.xmsf                # Xiaomi servis çerçevesi / bildirimler
+  - com.miui.global.packageinstaller
+  - com.android.camera             # MIUI kamera
+  - com.miui.notification
+  - com.xiaomi.finddevice
+  - com.miui.cloudservice.sysbase
+
+actions:
+  # --- ekran yenileme hızı (HyperOS / MIUI) ----------------------------------------
+  - id: mi_refresh_high
+    type: setting
+    namespace: system
+    key: peak_refresh_rate
+    value: "120.0"
+    rom: [hyperos, miui]
+    category: performance
+    risk: safe
+    verified: false
+    title: Yüksek ekran yenileme hızı
+    description: Ekranın en yüksek yenileme hızını 120 Hz'e izin verecek şekilde ayarlar. Pil biraz daha hızlı biter.
+
+  - id: mi_refresh_standard
+    type: setting
+    namespace: system
+    key: peak_refresh_rate
+    value: "60.0"
+    rom: [hyperos, miui]
+    category: battery
+    risk: safe
+    verified: false
+    title: Standart ekran yenileme hızı (60 Hz)
+    description: Ekranı 60 Hz ile sınırlar. Pil daha uzun gider.
+
+  # --- performans ---------------------------------------------------------------
+  - id: mi_joyose
+    type: package_disable
+    package: com.xiaomi.joyose
+    category: performance
+    risk: careful
+    verified: false
+    source: uad
+    title: Joyose'u kapat
+    description: Oyunlarda performansı bulut ayarlarıyla kısan servis. Kapatınca oyunlar hızlanabilir ama telefon daha çok ısınabilir.
+
+  # --- temizlik: reklam ve analiz ------------------------------------------------------
+  - id: mi_msa
+    type: package_disable
+    package: com.miui.msa.global
+    category: cleanup
+    risk: safe
+    verified: false
+    source: uad
+    title: MSA reklam servisini kapat
+    description: MIUI/HyperOS sistem uygulamalarındaki reklamları gösteren servis.
+
+  - id: mi_analytics
+    type: package_disable
+    package: com.miui.analytics
+    category: cleanup
+    risk: safe
+    verified: false
+    source: uad
+    title: Analiz servisini kapat
+    description: Xiaomi'ye kullanım verisi gönderen servis.
+
+  - id: mi_daemon
+    type: package_disable
+    package: com.miui.daemon
+    category: cleanup
+    risk: careful
+    verified: false
+    source: uad
+    title: MIUI Daemon'u kapat
+    description: Cihaz ve kullanım verisi toplayan arka plan servisi.
+
+  - id: mi_bugreport
+    type: package_disable
+    package: com.miui.bugreport
+    category: cleanup
+    risk: safe
+    verified: false
+    source: uad
+    title: Hata bildirim uygulamasını kapat
+    description: Xiaomi'ye hata raporu gönderen uygulama.
+
+  - id: mi_hybrid
+    type: package_disable
+    package: com.miui.hybrid
+    category: cleanup
+    risk: safe
+    verified: false
+    source: uad
+    title: Hızlı Uygulamalar'ı kapat
+    description: Kurulmadan çalışan mini uygulama altyapısı. Çoğu kullanıcı kullanmaz.
+
+  - id: mi_hybrid_accessory
+    type: package_disable
+    package: com.miui.hybrid.accessory
+    category: cleanup
+    risk: safe
+    verified: false
+    source: uad
+    title: Hızlı Uygulamalar eklentisini kapat
+    description: Hızlı Uygulamalar'ın yardımcı paketi.
+
+  - id: mi_yellowpage
+    type: package_disable
+    package: com.miui.yellowpage
+    category: cleanup
+    risk: safe
+    verified: false
+    source: uad
+    title: Sarı Sayfalar'ı kapat
+    description: İşletme numarası tanıma servisi. Türkiye'de işlevsizdir.
+
+  - id: mi_glance
+    type: package_disable
+    package: com.miui.android.fashiongallery
+    category: cleanup
+    risk: safe
+    verified: false
+    source: uad
+    title: Kilit ekranı duvar kağıdı döngüsünü kapat
+    description: Kilit ekranında reklamlı içerik gösteren duvar kağıdı servisi.
+
+  - id: mi_games
+    type: package_disable
+    package: com.xiaomi.glgm
+    category: cleanup
+    risk: safe
+    verified: false
+    source: uad
+    title: Xiaomi Oyunlar'ı kapat
+    description: Oyun önerileri ve reklam gösteren uygulama.
+
+  - id: mi_app_vault
+    type: package_disable
+    package: com.mi.globalminusscreen
+    category: cleanup
+    risk: careful
+    verified: false
+    source: uad
+    title: Uygulama Kasası'nı kapat
+    description: Ana ekranın solundaki kartlar sayfası kaybolur.
+
+  - id: mi_getapps
+    type: package_disable
+    package: com.xiaomi.mipicks
+    category: cleanup
+    risk: careful
+    verified: false
+    source: uad
+    title: GetApps'i kapat
+    description: Xiaomi uygulama mağazası ve reklam bildirimleri. Bazı Xiaomi uygulamaları güncellenmez.
+
+  - id: mi_cloudbackup
+    type: package_disable
+    package: com.miui.cloudbackup
+    category: cleanup
+    risk: careful
+    verified: false
+    source: uad
+    title: Xiaomi Bulut yedeklemeyi kapat
+    description: Xiaomi bulut yedeği kullanıyorsanız kapatmayın.
+
+  - id: mi_video
+    type: package_disable
+    package: com.miui.videoplayer
+    category: cleanup
+    risk: careful
+    verified: false
+    source: uad
+    title: Mi Video'yu kapat
+    description: Başka bir video oynatıcı kullanıyorsanız kapatılabilir.
+
+  # --- uzman: kaldırma --------------------------------------------------------------
+  - id: mi_msa_uninstall
+    type: package_uninstall
+    package: com.miui.msa.global
+    category: cleanup
+    risk: expert
+    verified: false
+    source: uad
+    title: MSA reklam servisini kaldır
+    description: Kapatma işe yaramazsa kullanıcı için kaldırır. Geri getirilirse fabrika sürümü gelir, güncellemeler kaybolur.
+
+presets:
+  max_performance: [anim_window, anim_transition, anim_animator, compile_all]
+  max_battery: [anim_window, anim_transition, anim_animator, wifi_scan_off, ble_scan_off,
+                mobile_data_always_on_off, adaptive_battery_on, app_standby_on]
+  balanced: [anim_window, anim_transition, anim_animator, compile_all]

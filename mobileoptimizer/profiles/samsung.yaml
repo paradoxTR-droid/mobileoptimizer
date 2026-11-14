@@ -1,0 +1,225 @@
+# Samsung (One UI). Test cihazı: Galaxy A25.
+# Markaya özel işlemler verified: false gelir. Galaxy A25'te
+#   python -m mobileoptimizer.tools.verify_profile --serial <seri> --profile samsung
+# ile OK görünen ve uygula + geri al denemesi geçen satırlar verified: true yapılır.
+# Sonra istenirse hazır profillere eklenebilir.
+brand: samsung
+match: [samsung]
+extends: generic
+
+# Bu paketlere hiçbir profil dokunamaz (çekirdek listeye ek olarak).
+blacklist_add:
+  - com.sec.android.app.launcher          # One UI ana ekran
+  - com.samsung.android.dialer            # telefon
+  - com.samsung.android.incallui          # arama ekranı
+  - com.samsung.android.app.contacts      # rehber
+  - com.samsung.android.providers.contacts
+  - com.samsung.android.messaging         # mesajlar
+  - com.sec.android.app.camera            # kamera
+  - com.samsung.android.honeyboard        # Samsung klavye
+  - com.samsung.android.kgclient          # Knox Guard: taksitli cihazlarda kilitlenmeye yol açar
+  - com.samsung.android.knox.attestation  # Knox çekirdeği
+  - com.samsung.android.knox.containercore
+  - com.sec.android.soagent               # yazılım güncelleme ajanı
+  - com.wssyncmldm                        # OTA güncelleme
+  - com.sec.android.app.samsungapps       # Galaxy Store (sistem uygulaması güncellemeleri)
+  - com.samsung.android.lool              # Cihaz bakımı / pil yönetimi
+  - com.samsung.android.biometrics.app.setting
+  - com.sec.android.app.SecSetupWizard
+  - com.samsung.android.providers.media
+  - com.samsung.android.networkstack
+
+actions:
+  # --- ekran yenileme hızı -----------------------------------------------------
+  - id: sam_refresh_high
+    type: setting
+    namespace: secure
+    key: refresh_rate_mode
+    value: "1"
+    rom: [oneui]
+    category: performance
+    risk: safe
+    verified: false
+    title: Yüksek ekran yenileme hızı
+    description: Ekranı desteklenen en yüksek hıza (90/120 Hz) alır. Akıcılık artar, pil biraz daha hızlı biter.
+
+  - id: sam_refresh_standard
+    type: setting
+    namespace: secure
+    key: refresh_rate_mode
+    value: "0"
+    rom: [oneui]
+    category: battery
+    risk: safe
+    verified: false
+    title: Standart ekran yenileme hızı (60 Hz)
+    description: Ekranı 60 Hz'e alır. Pil daha uzun gider.
+
+  # --- performans ---------------------------------------------------------------
+  - id: sam_gos
+    type: package_disable
+    package: com.samsung.android.game.gos
+    category: performance
+    risk: careful
+    verified: false
+    source: uad
+    title: Game Optimizing Service'i kapat
+    description: Oyunlarda performansı kısan Samsung servisi. Kapatınca oyunlar daha hızlı olabilir ama telefon daha çok ısınabilir. Game Launcher bazı özelliklerini kaybeder.
+
+  # --- temizlik: reklam, analiz, gereksiz ---------------------------------------
+  - id: sam_tips
+    type: package_disable
+    package: com.samsung.android.app.tips
+    category: cleanup
+    risk: safe
+    verified: false
+    source: uad
+    title: İpuçları uygulamasını kapat
+    description: Samsung'un ipucu bildirimlerini gönderen uygulama.
+
+  - id: sam_free
+    type: package_disable
+    package: com.samsung.android.app.spage
+    category: cleanup
+    risk: safe
+    verified: false
+    source: uad
+    title: Samsung Free'yi kapat
+    description: Ana ekranın solundaki haber/reklam sayfası.
+
+  - id: sam_customization
+    type: package_disable
+    package: com.samsung.android.rubin.app
+    category: cleanup
+    risk: safe
+    verified: false
+    source: uad
+    title: Özelleştirme Hizmeti'ni kapat
+    description: Kullanım alışkanlıklarınızı toplayıp öneri ve reklam için kullanan servis.
+
+  - id: sam_dqagent
+    type: package_disable
+    package: com.samsung.android.dqagent
+    category: cleanup
+    risk: safe
+    verified: false
+    source: uad
+    title: Cihaz kalite ajanını kapat
+    description: Samsung'a kullanım ve kalite verisi gönderen servis.
+
+  - id: sam_diagmon
+    type: package_disable
+    package: com.sec.android.diagmonagent
+    category: cleanup
+    risk: safe
+    verified: false
+    source: uad
+    title: Tanılama verisi gönderimini kapat
+    description: Samsung'a hata ve tanılama verisi gönderen servis.
+
+  - id: sam_ar_doodle
+    type: package_disable
+    package: com.samsung.android.ardrawing
+    category: cleanup
+    risk: safe
+    verified: false
+    source: uad
+    title: AR Doodle'ı kapat
+    description: Kamerada artırılmış gerçeklik çizim özelliği.
+
+  - id: sam_kids_installer
+    type: package_disable
+    package: com.samsung.android.kidsinstaller
+    category: cleanup
+    risk: safe
+    verified: false
+    source: uad
+    title: Samsung Kids yükleyicisini kapat
+    description: Samsung Kids'i kurmak için önyüklü gelen yükleyici.
+
+  - id: sam_watch_stub
+    type: package_disable
+    package: com.samsung.android.app.watchmanagerstub
+    category: cleanup
+    risk: safe
+    verified: false
+    source: uad
+    title: Galaxy Wearable kısayolunu kapat
+    description: Saat bağlamıyorsanız gereksiz kısayol uygulaması.
+
+  - id: sam_mateagent
+    type: package_disable
+    package: com.samsung.android.mateagent
+    category: cleanup
+    risk: safe
+    verified: false
+    source: uad
+    title: Galaxy Friends'i kapat
+    description: Aksesuar önerileri gösteren servis.
+
+  - id: sam_bixby_vision
+    type: package_disable
+    package: com.samsung.android.visionintelligence
+    category: cleanup
+    risk: careful
+    verified: false
+    source: uad
+    title: Bixby Vision'ı kapat
+    description: Kameradaki Bixby Vision özelliği kaybolur.
+
+  - id: sam_bixby_agent
+    type: package_disable
+    package: com.samsung.android.bixby.agent
+    category: cleanup
+    risk: careful
+    verified: false
+    source: uad
+    title: Bixby Sesli Asistan'ı kapat
+    description: Bixby kullanmıyorsanız arka planda çalışmasını durdurur. Yan tuş ayarını kontrol edin.
+
+  - id: sam_routines
+    type: package_disable
+    package: com.samsung.android.app.routines
+    category: cleanup
+    risk: careful
+    verified: false
+    source: uad
+    title: Modlar ve Rutinler'i kapat
+    description: Rutin kullanmıyorsanız kapatılabilir. Kullanıyorsanız rutinler çalışmaz.
+
+  - id: sam_push
+    type: package_disable
+    package: com.sec.spp.push
+    category: cleanup
+    risk: careful
+    verified: false
+    source: uad
+    title: Samsung Push Servisi'ni kapat
+    description: Samsung uygulamalarının bildirimleri gelmeyebilir. Diğer uygulamalar etkilenmez.
+
+  - id: sam_internet
+    type: package_disable
+    package: com.sec.android.app.sbrowser
+    category: cleanup
+    risk: careful
+    verified: false
+    source: uad
+    title: Samsung Internet'i kapat
+    description: Başka bir tarayıcı kullanıyorsanız kapatılabilir.
+
+  # --- uzman: kaldırma --------------------------------------------------------------
+  - id: sam_free_uninstall
+    type: package_uninstall
+    package: com.samsung.android.app.spage
+    category: cleanup
+    risk: expert
+    verified: false
+    source: uad
+    title: Samsung Free'yi kaldır
+    description: Devre dışı bırakmak yerine kullanıcı için kaldırır. Geri getirilirse fabrika sürümü gelir, güncellemeler kaybolur.
+
+presets:
+  max_performance: [anim_window, anim_transition, anim_animator, compile_all]
+  max_battery: [anim_window, anim_transition, anim_animator, wifi_scan_off, ble_scan_off,
+                mobile_data_always_on_off, adaptive_battery_on, app_standby_on]
+  balanced: [anim_window, anim_transition, anim_animator, compile_all]
