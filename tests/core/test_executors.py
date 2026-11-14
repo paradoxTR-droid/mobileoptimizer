@@ -122,6 +122,12 @@ def test_apply_failure_in_stdout_raises():
         apply(fa, A("package_disable", package=PKG))
 
 
+def test_compile_uses_long_timeout():
+    fa = fake()
+    apply(fa, A("compile", mode="speed-profile"))
+    assert fa.timeouts[-1] >= 1800
+
+
 def test_compile_single_package_command():
     fa = fake()
     apply(fa, A("compile", mode="speed-profile", package=PKG))

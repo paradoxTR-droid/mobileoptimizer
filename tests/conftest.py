@@ -13,6 +13,7 @@ class _FakeRun:
 
     def __call__(self, args, **kwargs):
         self.last_args = list(args)
+        self.last_kwargs = kwargs
         return SimpleNamespace(stdout=self.stdout, stderr=self.stderr, returncode=self.returncode)
 
 

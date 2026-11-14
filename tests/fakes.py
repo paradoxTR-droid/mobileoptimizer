@@ -23,6 +23,7 @@ class FakeAdb:
         self.home: str = ""
         self.pushed: dict[str, str] = {}
         self.calls: list[list[str]] = []
+        self.timeouts: list[int] = []
         self.disconnect_after: int | None = None
         self.fail_push = False
         self.roles_fail = False
@@ -32,10 +33,11 @@ class FakeAdb:
     def devices(self) -> list[DeviceEntry]:
         return list(self.device_list)
 
-    def shell(self, args: list[str]) -> ShellResult:
+    def shell(self, args: list[str], timeout: int = 120) -> ShellResult:
         if self.disconnect_after is not None and len(self.calls) >= self.disconnect_after:
             raise AdbDisconnected("device offline")
         self.calls.append(list(args))
+        self.timeouts.append(timeout)
         handler = getattr(self, "_h_" + args[0].replace("-", "_"), None)
         if handler is None:
             raise AssertionError(f"FakeAdb: unhandled command {args}")

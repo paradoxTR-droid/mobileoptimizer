@@ -24,6 +24,11 @@ def test_shell_quotes_dangerous_arg(fake_run):
     assert fake_run.last_args[-1] == "echo 'a; reboot'"
 
 
+def test_shell_passes_timeout(fake_run):
+    Adb(Path("adb"), "R5CX1").shell(["true"], timeout=1800)
+    assert fake_run.last_kwargs["timeout"] == 1800
+
+
 def test_shell_raises_disconnected(fake_run):
     fake_run.returncode, fake_run.stderr = 1, "error: device 'R5CX1' not found"
     with pytest.raises(AdbDisconnected):

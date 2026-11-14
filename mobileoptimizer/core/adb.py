@@ -69,8 +69,8 @@ class Adb:
                 entries.append(DeviceEntry(parts[0].strip(), parts[1].strip()))
         return entries
 
-    def shell(self, args: list[str]) -> ShellResult:
-        return self._run(["shell", shlex.join(args)])
+    def shell(self, args: list[str], timeout: int = 120) -> ShellResult:
+        return self._run(["shell", shlex.join(args)], timeout=timeout)
 
     def push(self, local: Path, remote: str) -> None:
         r = self._run(["push", str(local), remote])

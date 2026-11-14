@@ -13,8 +13,11 @@ REASON_ALREADY_REMOVED = "zaten kaldırılmış"
 REASON_GONE = "cihazda artık yok"
 
 
-def _run(adb, args: list[str]) -> str:
-    r = adb.shell(args)
+COMPILE_TIMEOUT = 3600  # `compile -a` can take tens of minutes on a full phone
+
+
+def _run(adb, args: list[str], timeout: int = 120) -> str:
+    r = adb.shell(args, timeout=timeout)
     if r.code != 0 or any(m in r.out for m in _FAIL_MARKERS):
         raise AdbError(f"{' '.join(args)}: {(r.err or r.out).strip()}")
     return r.out
@@ -107,7 +110,7 @@ def apply(adb, action: Action) -> None:
     elif t == "compile":
         mode = p.get("mode", "speed-profile")
         target = ["-f", p["package"]] if p.get("package") else ["-a"]
-        _run(adb, ["cmd", "package", "compile", "-m", mode, *target])
+        _run(adb, ["cmd", "package", "compile", "-m", mode, *target], timeout=COMPILE_TIMEOUT)
     else:
         raise AdbError(f"unknown action type {t}")
 
