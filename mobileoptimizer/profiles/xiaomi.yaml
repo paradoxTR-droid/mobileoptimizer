@@ -208,7 +208,9 @@ actions:
     description: Kapatma işe yaramazsa kullanıcı için kaldırır. Geri getirilirse fabrika sürümü gelir, güncellemeler kaybolur.
 
 presets:
-  max_performance: [anim_window, anim_transition, anim_animator, compile_all]
+  max_performance: [anim_window, anim_transition, anim_animator, compile_all,
+                    fb_appmanager, fb_services, fb_system]
   max_battery: [anim_window, anim_transition, anim_animator, wifi_scan_off, ble_scan_off,
-                mobile_data_always_on_off, adaptive_battery_on, app_standby_on]
-  balanced: [anim_window, anim_transition, anim_animator, compile_all]
+                mobile_data_always_on_off, adaptive_battery_on, app_standby_on,
+                fb_appmanager, fb_services, fb_system, fb_katana_rare]
+  balanced: [anim_window, anim_transition, anim_animator, compile_all, fb_appmanager, fb_services, fb_system]

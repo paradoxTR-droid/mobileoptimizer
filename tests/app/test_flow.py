@@ -65,7 +65,8 @@ def test_full_flow_apply_and_report(win, qtbot):
     win.preview_page.apply_btn.click()
     qtbot.waitUntil(lambda: win.stack.currentWidget() is win.report_page, timeout=5000)
     assert win.fa.settings[("global", "window_animation_scale")] == "0.5"
-    assert win.report_page.list.count() == 4
+    lines = [win.report_page.list.item(i).text() for i in range(win.report_page.list.count())]
+    assert sum("— uygulandı" in line for line in lines) == 4  # the brand packages are absent on the fake: skipped
     assert "uygulandı (zamanla sıfırlanabilir)" in "\n".join(
         win.report_page.list.item(i).text() for i in range(win.report_page.list.count()))
     assert len(win.store.list("R5CX1")) == 1

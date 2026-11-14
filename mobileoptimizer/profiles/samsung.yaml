@@ -1,5 +1,6 @@
 # Samsung (One UI). Test cihazı: Galaxy A25.
-# Markaya özel işlemler verified: false gelir. Galaxy A25'te
+# verified: true olanlar Galaxy A25 (One UI 8.5, Android 16) üzerinde uygula + geri al ile denendi (2026-11-14).
+# Diğerleri verified: false. Galaxy A25.te
 #   python -m mobileoptimizer.tools.verify_profile --serial <seri> --profile samsung
 # ile OK görünen ve uygula + geri al denemesi geçen satırlar verified: true yapılır.
 # Sonra istenirse hazır profillere eklenebilir.
@@ -39,7 +40,7 @@ actions:
     rom: [oneui]
     category: performance
     risk: safe
-    verified: false
+    verified: true
     title: Yüksek ekran yenileme hızı
     description: Ekranı desteklenen en yüksek hıza (90/120 Hz) alır. Akıcılık artar, pil biraz daha hızlı biter.
 
@@ -51,7 +52,7 @@ actions:
     rom: [oneui]
     category: battery
     risk: safe
-    verified: false
+    verified: true
     title: Standart ekran yenileme hızı (60 Hz)
     description: Ekranı 60 Hz'e alır. Pil daha uzun gider.
 
@@ -92,7 +93,7 @@ actions:
     package: com.samsung.android.rubin.app
     category: cleanup
     risk: safe
-    verified: false
+    verified: true
     source: uad
     title: Özelleştirme Hizmeti'ni kapat
     description: Kullanım alışkanlıklarınızı toplayıp öneri ve reklam için kullanan servis.
@@ -102,7 +103,7 @@ actions:
     package: com.samsung.android.dqagent
     category: cleanup
     risk: safe
-    verified: false
+    verified: true
     source: uad
     title: Cihaz kalite ajanını kapat
     description: Samsung'a kullanım ve kalite verisi gönderen servis.
@@ -112,7 +113,7 @@ actions:
     package: com.sec.android.diagmonagent
     category: cleanup
     risk: safe
-    verified: false
+    verified: true
     source: uad
     title: Tanılama verisi gönderimini kapat
     description: Samsung'a hata ve tanılama verisi gönderen servis.
@@ -132,7 +133,7 @@ actions:
     package: com.samsung.android.kidsinstaller
     category: cleanup
     risk: safe
-    verified: false
+    verified: true
     source: uad
     title: Samsung Kids yükleyicisini kapat
     description: Samsung Kids'i kurmak için önyüklü gelen yükleyici.
@@ -142,7 +143,7 @@ actions:
     package: com.samsung.android.app.watchmanagerstub
     category: cleanup
     risk: safe
-    verified: false
+    verified: true
     source: uad
     title: Galaxy Wearable kısayolunu kapat
     description: Saat bağlamıyorsanız gereksiz kısayol uygulaması.
@@ -219,7 +220,12 @@ actions:
     description: Devre dışı bırakmak yerine kullanıcı için kaldırır. Geri getirilirse fabrika sürümü gelir, güncellemeler kaybolur.
 
 presets:
-  max_performance: [anim_window, anim_transition, anim_animator, compile_all]
+  max_performance: [anim_window, anim_transition, anim_animator, compile_all, sam_refresh_high,
+                    fb_appmanager, fb_services, fb_system,
+                    sam_customization, sam_dqagent, sam_diagmon, sam_kids_installer, sam_watch_stub]
   max_battery: [anim_window, anim_transition, anim_animator, wifi_scan_off, ble_scan_off,
-                mobile_data_always_on_off, adaptive_battery_on, app_standby_on]
-  balanced: [anim_window, anim_transition, anim_animator, compile_all]
+                mobile_data_always_on_off, adaptive_battery_on, app_standby_on,
+                sam_refresh_standard, fb_appmanager, fb_services, fb_system, fb_katana_rare,
+                sam_customization, sam_dqagent, sam_diagmon, sam_kids_installer, sam_watch_stub]
+  balanced: [anim_window, anim_transition, anim_animator, compile_all, fb_appmanager, fb_services, fb_system,
+             sam_customization, sam_dqagent, sam_diagmon, sam_kids_installer, sam_watch_stub]

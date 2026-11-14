@@ -136,7 +136,7 @@ actions:
     package: com.facebook.appmanager
     category: cleanup
     risk: safe
-    verified: false
+    verified: true
     source: uad
     title: Facebook App Manager'ı kapat
     description: Facebook uygulamalarını arka planda güncelleyen önyüklü servis. Facebook'u kullanmaya devam edebilirsiniz.
@@ -146,7 +146,7 @@ actions:
     package: com.facebook.services
     category: cleanup
     risk: safe
-    verified: false
+    verified: true
     source: uad
     title: Facebook Services'i kapat
     description: Arka planda çalışan önyüklü Facebook servisi.
@@ -156,7 +156,7 @@ actions:
     package: com.facebook.system
     category: cleanup
     risk: safe
-    verified: false
+    verified: true
     source: uad
     title: Facebook App Installer'ı kapat
     description: Facebook uygulamalarını kurmak için önyüklü gelen servis.
@@ -167,12 +167,14 @@ actions:
     bucket: rare
     category: battery
     risk: safe
-    verified: false
+    verified: true
     title: Facebook'u nadir kullanılan olarak işaretle
     description: Facebook uygulamasının arka planda daha az uyanmasını sağlar. Android zamanla bu ayarı değiştirebilir.
 
 presets:
-  max_performance: [anim_window, anim_transition, anim_animator, compile_all]
+  max_performance: [anim_window, anim_transition, anim_animator, compile_all,
+                    fb_appmanager, fb_services, fb_system]
   max_battery: [anim_window, anim_transition, anim_animator, wifi_scan_off, ble_scan_off,
-                mobile_data_always_on_off, adaptive_battery_on, app_standby_on]
-  balanced: [anim_window, anim_transition, anim_animator, compile_all]
+                mobile_data_always_on_off, adaptive_battery_on, app_standby_on,
+                fb_appmanager, fb_services, fb_system, fb_katana_rare]
+  balanced: [anim_window, anim_transition, anim_animator, compile_all, fb_appmanager, fb_services, fb_system]
